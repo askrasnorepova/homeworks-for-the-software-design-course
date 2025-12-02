@@ -1,0 +1,59 @@
+version: "3.8"
+services: 
+  app:
+    build: ./app/
+    container_name: ASR-api
+    restart: unless-stopped
+    env_file:
+    - ./app/.env
+    volumes:
+      - ./app:/app
+    networks:
+      - ASR-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  web:
+    image: nginx:latest
+    container_name: ASR-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - ASR-network
+
+  rabbitmq:
+    image: rabbitmq:latest
+    container_name: ASR-rabbitmq
+    restart: on-failure
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - .rabbitmq/:/var/lib/rabbitmq
+    networks:
+      - ASR-network
+    
+  database:
+    image: postgres:latest
+    container_name: ASR-database
+    volumes:
+      - /mnt/db-data:var/lib/database/data
+    networks:
+      - ASR-network
+
+  elevenlabs:
+    image: 
+
+networks:
+  ASR-network:
+    name: ASR-network
+    driver: bridge
