@@ -99,11 +99,13 @@ class User(SQLModel, table=True):
     def transactions_count(self) -> int:
         """Number of transactions associated with user"""
         return len(self.transactions) 
-
-    class Config:
-        """Model configuration"""
-        validate_assignment = True
-        arbitrary_types_allowed = True
+    
+    def get_user_balance(user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            return user.actual_balance
+        except User.DoesNotExist:
+            return None
 
     def change_user_balance(id, user_balance, is_admin):
         """Change user balance"""

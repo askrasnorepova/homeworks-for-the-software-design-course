@@ -45,11 +45,28 @@ class Transaction(TransactionsBase, table=True):
     def get_actual_balance(self, transaction_size, balance) -> float:
         balance += transaction_size
         return balance
-    
+
     def __str__(self) -> str:
         result = (f"Id: {self.id}. Creator: {self.user.email}. Transaction size: {self.transaction_size} cr. Balance after transaction: {self.actual_balance} cr. Transaction time: {self.created_at}.")
         return result
 
 class TransactionCreate(TransactionsBase):
-    """Schema for creating new events"""
-    pass
+     def process_transaction(user, transaction_size, is_replenishment):
+        """
+        Replenishment or decrease.
+
+        transaction_size: float
+        is_replenishment: bool, True if Replenishment, False — decrease
+        """
+
+        if is_replenishment:
+            if transaction_size < 0:
+                raise ValueError("Сумма пополнения не может быть отрицательной")
+            actual_balance += transaction_size
+        else:
+            if transaction_size <= 0:
+                raise ValueError("Сумма списания должна быть положительной")
+            if actual_balance < transaction_size:
+                raise ValueError("Недостаточно средств для списания")
+            actual_balance -= transaction_size
+        return actual_balance
