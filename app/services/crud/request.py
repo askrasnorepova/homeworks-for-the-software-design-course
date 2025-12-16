@@ -105,3 +105,15 @@ def delete_request(request_id: int, session: Session) -> bool:
         session.rollback()
         raise
 
+def save_request_history(db: Session, request: Request):
+    request_history = RequestHistory(
+        request_id=request.id,
+        user_id=request.user_id,
+        audio=request.audio,
+        cost=request.cost,
+        timestamp=request.timestamp,
+    )
+    db.add(request_history)
+    db.commit()
+    db.refresh(request_history)
+    return request_history
