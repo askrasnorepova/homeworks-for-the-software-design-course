@@ -105,3 +105,15 @@ def delete_transaction(transaction_id: int, session: Session) -> bool:
         session.rollback()
         raise
 
+def save_transaction_history(db: Session, transaction: Transaction):
+    transaction_history = TransactionHistory(
+        transaction_id=transaction.id,
+        user_id=transaction.user_id,
+        amount=transaction.amount,
+        type=transaction.type,
+        timestamp=transaction.timestamp,
+    )
+    db.add(transaction_history)
+    db.commit()
+    db.refresh(transaction_history)
+    return transaction_history
