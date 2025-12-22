@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<title>Сервис для распознавания аудиозаписей</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  header h1 {
+    margin: 0;
+  }
+  #authMessage {
+    color: red;
+    font-weight: bold;
+  }
+  .main-content {
+    display: none;
+  }
+  /* Стиль для блока загрузки, кнопок, результата — как ранее */
+  .upload-section {
+    margin-bottom: 20px;
+  }
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+  }
+  .decode-section {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+  }
+  .cost {
+    margin-left: 20px;
+    font-weight: bold;
+  }
+  #transcription {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    min-height: 100px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Сервис для распознавания аудиозаписей</h1>
+  <button id="loginBtn">Login</button>
+</header>
+
+<div id="authMessage"></div>
+
+<div class="main-content" id="mainContent">
+  <div class="upload-section">
+    <label for="audioFile">Загрузите аудиозапись:</label><br />
+    <input type="file" id="audioFile" accept="audio/*" />
+  </div>
+
+  <div class="decode-section">
+    <button id="decodeBtn">Расшифровать</button>
+    <div class="cost" id="costDisplay">Стоимость: -- руб.</div>
+  </div>
+
+  <div id="transcription"></div>
+</div>
+
+<script>
+const authMessage = document.getElementById('authMessage');
+const mainContent = document.getElementById('mainContent');
+const loginBtn = document.getElementById('loginBtn');
+
+let isAuthenticated = false;
+
+
+async function checkAuth() {
+  try {
+    const response = await fetch('/auth');
+    const data = await response.json();
+    if (data.authenticated) {
+      isAuthenticated = true;
+      authMessage.style.display = 'none';
+      mainContent.style.display = 'block';
+    } else {
+      isAuthenticated = false;
+      authMessage.textContent = 'Для использования сервиса, пожалуйста, авторизуйтесь.';
+      mainContent.style.display = 'none';
+    }
+  } catch (error) {
+    console.error('Ошибка проверки авторизации:', error);
+    authMessage.textContent = 'Ошибка проверки входа. Попробуйте позже.';
+  }
+}
+
+loginBtn.addEventListener('click', () => {
+  window.location.href = 'login.html';
+});
+
+document.getElementById('decodeBtn').addEventListener('click', async () => {
+  const fileInput = document.getElementById('audioFile');
+  const transcriptionDiv = document.getElementById('transcription');
+  const costDiv = document.getElementById('costDisplay');
+
+  if (!fileInput.files || fileInput.files.length === 0) {
+    alert('Пожалуйста, выберите аудиофайл.');
+    return;
+  }
+
+  const file = fileInput.files[0];
+
+  // Получение продолжительности файла для расчета стоимости
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+  const arrayBuffer = await file.arrayBuffer();
+  const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+  const durationSeconds = audioBuffer.duration;
+
+  // Расчет стоимости через API
+  try {
+    const costResponse = await fetch(`/app/model/request/get_duration=${Math.ceil(durationSeconds)}`);
+    const costData = await costResponse.json();
+    document.getElementById('costDisplay').textContent = `Стоимость: ${costData.price} кр.`;
+  } catch (err) {
+    console.error('Ошибка получения стоимости:', err);
+    document.getElementById('costDisplay').textContent = 'Стоимость: не определена';
+  }
+
+  transcriptionDiv.innerHTML = 'Обработка файла...';
+
+  const formData = new FormData();
+  formData.append('audio', file);
+
+  try {
+    const response = await fetch('/api/transcribe', {
+      method: 'POST',
+      body: formData
+    });
+    const result = await response.json();
+    if (response.ok) {
+      transcriptionDiv.innerHTML = `<strong>Расшифровка:</strong> ${result.transcription}`;
+    } else {
+      transcriptionDiv.innerHTML = 'Ошибка при расшифровке.';
+    }
+  } catch (err) {
+    console.error('Ошибка обработки файла:', err);
+    transcriptionDiv.innerHTML = 'Ошибка при обработке файла.';
+  }
+});
+
+checkAuth();
+</script>
+
+</body>
+</html>
