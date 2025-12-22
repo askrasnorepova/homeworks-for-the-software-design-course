@@ -1,0 +1,18 @@
+<h1>Login</h1>
+
+For access to service autorize please.
+<form action="/auth/login" method="post">
+    <p>
+        <p><label for="">Enter your email</label></p>
+        <input type="email" name="email" value="email" required>
+    </p>
+    <p>
+        <p><label for="">Enter your password</label></p>
+        <input type="password" name="password" value="password" required>
+    </p>
+    <input type="submit" value="Submit">
+</form>
+
+<hr>
+
+{% include '_site_map.html' %}
