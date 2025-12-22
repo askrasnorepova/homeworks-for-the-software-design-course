@@ -110,3 +110,16 @@ class User(SQLModel, table=True):
         if is_admin == True:
             change = input(int('Введите сумму, на которую необходимо изменить баланс. Если Вы хотите уменьшить баланс, введите сумму со знаком "-"'))
             user_balance[id] += change
+
+    def get_user_balance(user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            return user.actual_balance
+        except User.DoesNotExist:
+            return None
+
+    def change_user_balance(id, user_balance, is_admin):
+        """Change user balance"""
+        if is_admin == True:
+            change = input(int('Введите сумму, на которую необходимо изменить баланс. Если Вы хотите уменьшить баланс, введите сумму со знаком "-"'))
+            user_balance[id] += change

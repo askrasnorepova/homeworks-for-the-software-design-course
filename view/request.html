@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<title>История запросов</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+  }
+  h2 {
+    margin-bottom: 15px;
+  }
+  .history-container {
+    margin-top: 20px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+  }
+  th {
+    background-color: #f2f2f2;
+  }
+  #noRequests {
+    font-style: italic;
+    color: #555;
+  }
+</style>
+</head>
+<body>
+
+<h2>История запросов</h2>
+
+<div class="history-container" id="historyContainer">
+  <!-- Тут будет таблица или сообщение -->
+</div>
+
+<script>
+  // Массив данных пример, его нужно наполнить данными из базы или API
+  const requests = [
+    // Пример записи:
+    /*{
+      date: '2023-10-20 14:35',
+      audioFile: 'record1.mp3',
+      cost: '10',
+      transcription: 'Это пример расшифровки'
+    }*/
+  ];
+
+  const container = document.getElementById('historyContainer');
+
+  if (requests.length === 0) {
+    // Если запросов нет — выводим сообщение
+    container.innerHTML = '<div id="noRequests">Запросов пока нет</div>';
+  } else {
+    // Создаем таблицу
+    const table = document.createElement('table');
+
+    // Заголовки
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    ['Дата запроса', 'Аудиозапись', 'Стоимость запроса', 'Расшифровка'].forEach(title => {
+      const th = document.createElement('th');
+      th.textContent = title;
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Тело таблицы
+    const tbody = document.createElement('tbody');
+    requests.forEach(req => {
+      const row = document.createElement('tr');
+
+      const dateCell = document.createElement('td');
+      dateCell.textContent = req.date;
+      row.appendChild(dateCell);
+
+      const audioCell = document.createElement('td');
+      // Можно сделать ссылку или отобразить имя файла
+      const link = document.createElement('a');
+      link.href = req.audioFile; // предполагается, что это ссылка или путь к файлу
+      link.textContent = 'Аудиозапись';
+      link.target = '_blank';
+      audioCell.appendChild(link);
+      row.appendChild(audioCell);
+
+      const costCell = document.createElement('td');
+      costCell.textContent = req.cost;
+      row.appendChild(costCell);
+
+      const transcriptionCell = document.createElement('td');
+      transcriptionCell.textContent = req.transcription;
+      row.appendChild(transcriptionCell);
+
+      tbody.appendChild(row);
+    });
+
+    table.appendChild(tbody);
+    container.appendChild(table);
+  }
+</script>
+
+</body>
+</html>

@@ -50,8 +50,31 @@ services:
     networks:
       - ASR-network
 
-  elevenlabs:
-    image: 
+  ml_model:
+    image: openai/whisper-small
+    container_name: whisper
+    volumes:
+      - whisper_data:/var/lib/openai/whisper-small
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - ASR-network
+
+  worker:
+    build:
+      context: ./mlworker
+    container_name: mlworker
+    depends_on:
+      - app
+      - rabbitmq
+      - ml_model
+      - database
+    volumes:
+      - ./mlworker:/mlworker
+    restart: unless-stopped
+    networks:
+      - ASR-network
 
 networks:
   ASR-network:
