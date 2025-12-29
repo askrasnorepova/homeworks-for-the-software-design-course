@@ -2,6 +2,13 @@ from models.transaction import Transaction
 from sqlmodel import Session, select
 from typing import List, Optional
 from datetime import datetime
+from sqlmodel import Session, create_engine
+
+engine = create_engine("sqlite:///./yourdb.db")
+
+def get_session():
+    with Session(engine) as session:
+        yield session
 
 def get_all_transactions(session: Session) -> List[Transaction]:
     """
@@ -104,4 +111,3 @@ def delete_transaction(transaction_id: int, session: Session) -> bool:
     except Exception as e:
         session.rollback()
         raise
-
