@@ -2,6 +2,13 @@ from models.request import Request
 from sqlmodel import Session, select
 from typing import List, Optional
 from datetime import datetime
+from sqlmodel import Session, create_engine
+
+engine = create_engine("sqlite:///./yourdb.db")
+
+def get_session():
+    with Session(engine) as session:
+        yield session
 
 def get_all_requests(session: Session) -> List[Request]:
     """
@@ -104,4 +111,3 @@ def delete_request(request_id: int, session: Session) -> bool:
     except Exception as e:
         session.rollback()
         raise
-
