@@ -4,6 +4,13 @@ from models.transaction import Transaction
 from sqlmodel import Session, select
 from sqlalchemy.orm import selectinload
 from typing import List, Optional
+from sqlmodel import Session, create_engine
+
+engine = create_engine("sqlite:///./yourdb.db")
+
+def get_session():
+    with Session(engine) as session:
+        yield session
 
 def get_all_users(session: Session) -> List[User]:
     """
